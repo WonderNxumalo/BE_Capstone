@@ -1,3 +1,36 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.conf import settings # To get AUTH_USER_MODEL
 
-# Create your models here.
+class CustomUser(AbstractUser):
+    # AbstractUser provides username, email, and password (custom fields can be added)
+    pass 
+
+class Event(models.Model):
+    # Functional Requirements
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    date_and_time = models.DateTimeField()
+    location = models.CharField(max_length=255)
+    organizer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='created_events')
+    capacity = models.PositiveBigIntegerField(help_text="Maximum number of attendees.")
+    created_date = models.DateTimeField(auto_now_add=True)
+    
+    # Event capicity management
+    attendees = models.ManyToManyField(settings.AUTH_USER_MODEL,related_name='attending_events',blank=True)
+    waitlist = models.ManyToManyField(settings.AUTH_USER_MODEL,related_name='waitlisted_events',blank=True)
+    
+    def __str__(self):
+        return self.title
+    
+    # Stretch Goal: Event Categories
+    category = models.ForeignKey('Category', on_delete=models.SET_NULL, null=True, blank=True)
+    
+class Category(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    
+    class Meta:
+        verbose_name_plural = "categories"
+        
+        def __str__(self):
+            return self.name 
