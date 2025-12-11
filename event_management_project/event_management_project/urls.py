@@ -16,8 +16,30 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from events.views import UserViewSet
+from rest_framework.routers import DefaultRouter
+from rest_framework.permissions import AllowAny
+
+# User Registration (Stretch Goal - simple view)
+from rest_framework import generics
+from events.serializers import UserRegistrationSerializer
+
+class RegisterUser(generics.CreateAPIView):
+    serializer_class = UserRegistrationSerializer
+    permission_classes = (AllowAny,)
+
+router = DefaultRouter()
+router.register('users', UserViewSet, basename='user')
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path('admin/', admin.site.urls),
+    # DRF Login/Logout (Built-in Auth)
+    path('api-auth/', include('rest_framework.urls')), 
+    # API Endpoints
+    path('api/v1/', include('events.urls')),
+    # User Registration Endpoint
+    path('api/v1/register/', RegisterUser.as_view(), name='register'),
+    # Custom User Detail Endpoints (e.g., api/v1/users/1/)
+    path('api/v1/', include(router.urls)),
 ]
