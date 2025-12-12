@@ -9,6 +9,7 @@ from .models import Event, CustomUser
 from .serializers import EventSerializer, UserRegistrationSerializer
 from .permissions import IsOrganizerOrReadOnly, IsAuthenticatedAndSelf
 from .filters import EventFilter 
+from rest_framework.pagination import PageNumberPagination
 
 # 1. User Management ViewSet (CRUD for Users)
 class UserViewSet(mixins.RetrieveModelMixin,
@@ -20,12 +21,19 @@ class UserViewSet(mixins.RetrieveModelMixin,
     serializer_class = UserRegistrationSerializer # Using registration serializer for updates
     permission_classes = [IsAuthenticated, IsAuthenticatedAndSelf]
 
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+    
+
+
 # 2. Event CRUD and Viewing Events ViewSet
 class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = EventFilter
-    pagination_class = None 
+    pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
         # View Upcoming Events: Filter events where date_and_time is in the future
@@ -79,3 +87,4 @@ class EventViewSet(viewsets.ModelViewSet):
         else:
             event.waitlist.add(user)
             return Response({'status': 'added to waitlist'}, status=status.HTTP_201_CREATED)
+        

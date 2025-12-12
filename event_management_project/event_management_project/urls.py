@@ -20,6 +20,7 @@ from django.urls import path, include
 from events.views import UserViewSet
 from rest_framework.routers import DefaultRouter
 from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.views import (TokenObtainPairView, TokenRefreshView)
 
 # User Registration (Stretch Goal - simple view)
 from rest_framework import generics
@@ -42,4 +43,6 @@ urlpatterns = [
     path('api/v1/register/', RegisterUser.as_view(), name='register'),
     # Custom User Detail Endpoints (e.g., api/v1/users/1/)
     path('api/v1/', include(router.urls)),
+    path('api/v1/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
