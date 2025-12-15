@@ -11,25 +11,34 @@ from .permissions import IsOrganizerOrReadOnly, IsAuthenticatedAndSelf
 from .filters import EventFilter 
 from rest_framework.pagination import PageNumberPagination
 
-# 1. User Management ViewSet (CRUD for Users)
-class UserViewSet(mixins.RetrieveModelMixin,
-                  mixins.UpdateModelMixin,
-                  mixins.DestroyModelMixin,
-                  viewsets.GenericViewSet):
-    # Only allow retrieving/updating/deleting the logged-in user's account
-    queryset = CustomUser.objects.all()
-    serializer_class = UserRegistrationSerializer # Using registration serializer for updates
-    permission_classes = [IsAuthenticated, IsAuthenticatedAndSelf]
+# --- Pagination Class ---
 
 class StandardResultsSetPagination(PageNumberPagination):
+    """Custom pagination settings for list views."""
     page_size = 10
     page_size_query_param = 'page_size'
     max_page_size = 100
     
+# --- 1. User Management ViewSet (CRUD for Users) ---
 
+class UserViewSet(mixins.RetrieveModelMixin,
+                  mixins.UpdateModelMixin,
+                  mixins.DestroyModelMixin,
+                  viewsets.GenericViewSet):
+    """
+    Allows retrieval, update, and deletion of user accounts.
+    Only allows access to the authenticated user's own profile.
+    """
+    queryset = CustomUser.objects.all()
+    serializer_class = UserRegistrationSerializer 
+    permission_classes = [IsAuthenticated, IsAuthenticatedAndSelf]
 
-# 2. Event CRUD and Viewing Events ViewSet
+# --- 2. Event CRUD and Viewing Events ViewSet ---
+
 class EventViewSet(viewsets.ModelViewSet):
+    """
+    CRUD operations for Events, including filtering, registration, and waitlist management.
+    """
     serializer_class = EventSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = EventFilter
@@ -56,13 +65,16 @@ class EventViewSet(viewsets.ModelViewSet):
     # Event Capacity Management (Enroll/Unenroll)
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def register(self, request, pk=None):
+        """Allows an authenticated user to register for or unregister from an event."""
         event = self.get_object()
         user = request.user
 
+        # Unregister logic
         if user in event.attendees.all():
             event.attendees.remove(user)
             return Response({'status': 'unregistered'}, status=status.HTTP_200_OK)
 
+        # Register logic
         if event.attendees.count() < event.capacity:
             event.attendees.add(user)
             # Remove from waitlist if applicable
@@ -75,6 +87,7 @@ class EventViewSet(viewsets.ModelViewSet):
     # Optional Waitlist Toggle
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def waitlist_toggle(self, request, pk=None):
+        """Allows an authenticated user to join or leave the waitlist."""
         event = self.get_object()
         user = request.user
 
@@ -88,29 +101,33 @@ class EventViewSet(viewsets.ModelViewSet):
             event.waitlist.add(user)
             return Response({'status': 'added to waitlist'}, status=status.HTTP_201_CREATED)
     
-# Create a new permission for comments (similar to IsOrganizer, but checking Comment ownership)
+# --- 3. Comment Permissions ---
+
 class IsCommentOwnerOrReadOnly(permissions.BasePermission):
+    """Custom permission to only allow owners of a comment to edit or delete it."""
     def has_object_permission(self, request, view, obj):
-        # Read permissions are allowed to any request
+        # Read permissions are allowed to any request (GET, HEAD, OPTIONS)
         if request.method in permissions.SAFE_METHODS:
             return True
         # Write permissions are only allowed to the owner of the comment
         return obj.user == request.user
 
-# Comment ViewSet
+# --- 4. Comment ViewSet ---
+
 class CommentViewSet(viewsets.ModelViewSet):
+    """CRUD operations for Comments, typically nested under an Event."""
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticatedOrReadOnly, IsCommentOwnerOrReadOnly]
 
     def get_queryset(self):
-        # Retrieve the event_id from the URL kwargs provided by the nested router
+        # Retrieve the event_pk from the URL kwargs provided by the nested router
         event_id = self.kwargs.get('event_pk')
         if event_id:
             # Filter comments to only show those belonging to the specified event
             return Comment.objects.filter(event_id=event_id)
-        return Comment.objects.none() # Return empty queryset if no event is specified
+        return Comment.objects.none()
 
     def perform_create(self, serializer):
-        # Automatically set the 'event' and 'user' fields
+        # Automatically set the 'event' and 'user' fields upon creation
         event = Event.objects.get(pk=self.kwargs['event_pk'])
-        serializer.save(user=self.request.user, event=event)    
+        serializer.save(user=self.request.user, event=event)

@@ -17,13 +17,15 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 class EventSerializer(serializers.ModelSerializer):
     organizer_username = serializers.CharField(source='organizer.username', read_only=True)
     attendees_count = serializers.SerializerMethodField()
+    
+    # Explicitly define category to make it writable
     category = serializers.PrimaryKeyRelatedField(
         queryset = Category.objects.all(),
         allow_null=True
     )
+    
     class Meta:
         model = Event
-        # Includes all fields but make 'organiser' read-only for API input
         fields = (
             'id', 'title', 'description', 'date_and_time', 'location', 'capacity', 'created_date', 'organizer',
             'organizer_username', 'attendees', 'waitlist', 'attendees_count', 'category'
@@ -51,12 +53,10 @@ class CommentSerializer(serializers.ModelSerializer):
             'id', 'event_id', 'user', 'user_username', 'content', 
             'rating', 'created_at'
         )
-        # We need 'user' to be read-only as it will be set by the viewset based on the logged-in user.
         read_only_fields = ('user', 'event_id', 'created_at')
 
     # Validation to ensure rating is within the 1-5 range if provided
     def validate_rating(self, value):
         if value is not None and (value < 1 or value > 5):
             raise serializers.ValidationError("Rating must be between 1 and 5.")
-        return value    
-    
+        return value
