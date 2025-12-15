@@ -16,7 +16,7 @@ class Event(models.Model):
     capacity = models.PositiveBigIntegerField(help_text="Maximum number of attendees.")
     created_date = models.DateTimeField(auto_now_add=True)
     
-    # Event capicity management
+    # Event capacity management
     attendees = models.ManyToManyField(settings.AUTH_USER_MODEL,related_name='attending_events',blank=True)
     waitlist = models.ManyToManyField(settings.AUTH_USER_MODEL,related_name='waitlisted_events',blank=True)
     

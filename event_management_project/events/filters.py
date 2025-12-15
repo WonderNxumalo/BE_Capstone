@@ -6,7 +6,7 @@ class EventFilter(django_filters.FilterSet):
     title = django_filters.CharFilter(lookup_expr='icontains')
     location = django_filters.CharFilter(lookup_expr='icontains')
     category = django_filters.ModelChoiceFilter(
-        queryset=Category.objects.all(), # Needs to be Category.objects.all() once Category model is defined
+        queryset=Category.objects.all(),
         field_name='category__name',
         to_field_name='name',
         lookup_expr='exact'

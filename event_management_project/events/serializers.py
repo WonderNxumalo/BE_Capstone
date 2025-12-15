@@ -17,7 +17,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 class EventSerializer(serializers.ModelSerializer):
     organizer_username = serializers.CharField(source='organizer.username', read_only=True)
     attendees_count = serializers.SerializerMethodField()
-    
+    category = serializers.PrimaryKeyRelatedField(
+        queryset = Category.objects.all(),
+        allow_null=True
+    )
     class Meta:
         model = Event
         # Includes all fields but make 'organiser' read-only for API input
