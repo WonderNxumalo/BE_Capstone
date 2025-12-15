@@ -1,12 +1,12 @@
 import django_filters
-from .models import Event
+from .models import Event, Category
 
 class EventFilter(django_filters.FilterSet):
     # Search/Filter by Title and Location (Case-insensitive contains)
     title = django_filters.CharFilter(lookup_expr='icontains')
     location = django_filters.CharFilter(lookup_expr='icontains')
     category = django_filters.ModelChoiceFilter(
-        queryset=Event.objects.all(), # Needs to be Category.objects.all() once Category model is defined
+        queryset=Category.objects.all(), # Needs to be Category.objects.all() once Category model is defined
         field_name='category__name',
         to_field_name='name',
         lookup_expr='exact'
@@ -17,4 +17,4 @@ class EventFilter(django_filters.FilterSet):
 
     class Meta:
         model = Event
-        fields = ['title', 'location', 'date_and_time']
+        fields = ['title', 'location', 'category', 'date_and_time']

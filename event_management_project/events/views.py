@@ -1,12 +1,12 @@
-from rest_framework import viewsets, mixins, status
+from rest_framework import viewsets, mixins, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly 
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 
-from .models import Event, CustomUser
-from .serializers import EventSerializer, UserRegistrationSerializer
+from .models import Event, CustomUser, Comment
+from .serializers import EventSerializer, UserRegistrationSerializer, CommentSerializer
 from .permissions import IsOrganizerOrReadOnly, IsAuthenticatedAndSelf
 from .filters import EventFilter 
 from rest_framework.pagination import PageNumberPagination
@@ -87,4 +87,30 @@ class EventViewSet(viewsets.ModelViewSet):
         else:
             event.waitlist.add(user)
             return Response({'status': 'added to waitlist'}, status=status.HTTP_201_CREATED)
-        
+    
+# Create a new permission for comments (similar to IsOrganizer, but checking Comment ownership)
+class IsCommentOwnerOrReadOnly(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        # Read permissions are allowed to any request
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        # Write permissions are only allowed to the owner of the comment
+        return obj.user == request.user
+
+# Comment ViewSet
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly, IsCommentOwnerOrReadOnly]
+
+    def get_queryset(self):
+        # Retrieve the event_id from the URL kwargs provided by the nested router
+        event_id = self.kwargs.get('event_pk')
+        if event_id:
+            # Filter comments to only show those belonging to the specified event
+            return Comment.objects.filter(event_id=event_id)
+        return Comment.objects.none() # Return empty queryset if no event is specified
+
+    def perform_create(self, serializer):
+        # Automatically set the 'event' and 'user' fields
+        event = Event.objects.get(pk=self.kwargs['event_pk'])
+        serializer.save(user=self.request.user, event=event)    

@@ -23,7 +23,7 @@ class Event(models.Model):
     def __str__(self):
         return self.title
     
-    # Stretch Goal: Event Categories
+# Stretch Goal: Event Categories
     category = models.ForeignKey('Category', on_delete=models.SET_NULL, null=True, blank=True)
     
 class Category(models.Model):
@@ -32,5 +32,25 @@ class Category(models.Model):
     class Meta:
         verbose_name_plural = "categories"
         
-        def __str__(self):
-            return self.name 
+    def __str__(self):
+        return self.name 
+
+# Stretch Goal: Event Comments
+        
+class Comment(models.Model):
+    '''
+    Model for storing comments and feedback related to an event.
+    '''
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='comments', help_text="The event this comment relates to.")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='submitted_comments', help_text="The user who submitted the comment.")
+    content = models.TextField(help_text="The text of the comment or feedback.")
+    rating = models.PositiveIntegerField(null=True, blank=True, choices=[(i, i) for i in range(1, 6)], help_text="Optional numerical rating (1-5)")
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['created_at']
+        
+    def __str__(self):
+        return f"Comment by {self.user.username} on {self.event.title}"
+    
+    
