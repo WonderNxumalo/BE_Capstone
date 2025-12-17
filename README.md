@@ -97,9 +97,9 @@ This feature allows users to submit comments and ratings for specific events.
 
 ## 5. User Endpoint (User Management)
 
-Users can view and update their own profiles
+Users can view and update their own profiles.
+
 | Endpoint | Method | Description | Authentication |
 | :--- | :--- | :--- | :--- |
-
 | `/api/v1/users/{id}` | `GET` | Retrieve specific user details. | Required |
 | `/api/v1/users/{id}` | `PATCH` | Update a user's details (User must match ID). | Required |
