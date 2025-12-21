@@ -15,7 +15,7 @@ This is a comprehensive Event Management API built using Django and Django REST 
 
 1.  **Clone the repository:**
     ```bash
-    git clone [your_repo_url]
+    git clone [repo_url]
     cd event_manager_project
     ```
 2.  **Create and activate a virtual environment:**
