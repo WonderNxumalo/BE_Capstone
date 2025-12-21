@@ -103,3 +103,42 @@ Users can view and update their own profiles
 
 | `/api/v1/users/{id}` | `GET` | Retrieve specific user details. | Required |
 | `/api/v1/users/{id}` | `PATCH` | Update a user's details (User must match ID). | Required |
+
+
+=====
+# Authentication and User Management
+
+Action,Method,URL
+Register New User,POST,http://zwidekalanga.pythonanywhere.com/api/v1/register/
+Obtain JWT Token,POST,http://zwidekalanga.pythonanywhere.com/api/v1/token/
+Refresh JWT Token,POST,http://zwidekalanga.pythonanywhere.com/api/v1/token/refresh/
+List/View Users,GET,http://zwidekalanga.pythonanywhere.com/api/v1/users/
+User Detail,GET/PATCH,http://zwidekalanga.pythonanywhere.com/api/v1/users/{user_id}/
+
+=
+# Event Management (CRUD and Filtering)
+## Requires token: Authorization: Bearer <your_access_token>
+
+Action,Method,URL
+List/Search Events,GET,http://zwidekalanga.pythonanywhere.com/api/v1/events/
+Create Event,POST,http://zwidekalanga.pythonanywhere.com/api/v1/events/
+Event Details,GET,http://zwidekalanga.pythonanywhere.com/api/v1/events/{id}/
+Update Event,PATCH,http://zwidekalanga.pythonanywhere.com/api/v1/events/{id}/
+Delete Event,DELETE,http://zwidekalanga.pythonanywhere.com/api/v1/events/{id}/
+
+= 
+
+# Event Participation (Registration and Waitlist)
+
+Action,Method,URL
+Join/Leave Event,POST,http://zwidekalanga.pythonanywhere.com/api/v1/events/{id}/register/
+Toggle Waitlist,POST,http://zwidekalanga.pythonanywhere.com/api/v1/events/{id}/waitlist_toggle/
+
+=
+# Comment and Feedback (Nested Endpoints)
+
+Action,Method,URL
+List Comments,GET,http://zwidekalanga.pythonanywhere.com/api/v1/events/{event_id}/comments/
+Post Comment,POST,http://zwidekalanga.pythonanywhere.com/api/v1/events/{event_id}/comments/
+Update Comment,PATCH,http://zwidekalanga.pythonanywhere.com/api/v1/events/{event_id}/comments/{comment_id}/
+Delete Comment,DELETE,http://zwidekalanga.pythonanywhere.com/api/v1/events/{event_id}/comments/{comment_id}/

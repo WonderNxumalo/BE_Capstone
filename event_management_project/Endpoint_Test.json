@@ -1,0 +1,116 @@
+{
+	"info": {
+		"name": "Event Management API - PythonAnywhere",
+		"description": "Full testing suite for the Event Management API deployed at zwidekalanga.pythonanywhere.com",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"email\": \"test@example.com\",\n    \"password\": \"StrongPassword123\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/register/", "host": ["{{baseUrl}}"], "path": ["api", "v1", "register", ""] }
+					}
+				},
+				{
+					"name": "Login (Get JWT)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"StrongPassword123\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/token/", "host": ["{{baseUrl}}"], "path": ["api", "v1", "token", ""] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Events",
+			"item": [
+				{
+					"name": "List Upcoming Events",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/v1/events/", "host": ["{{baseUrl}}"], "path": ["api", "v1", "events", ""] }
+					}
+				},
+				{
+					"name": "Create Event",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{jwtToken}}", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Postman Test Event\",\n    \"description\": \"Testing the deployed API\",\n    \"date_and_time\": \"2026-12-25T18:00:00Z\",\n    \"location\": \"Online\",\n    \"capacity\": 50\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/events/", "host": ["{{baseUrl}}"], "path": ["api", "v1", "events", ""] }
+					}
+				},
+				{
+					"name": "Register/Unregister",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{jwtToken}}", "type": "text" }
+						],
+						"url": { "raw": "{{baseUrl}}/api/v1/events/1/register/", "host": ["{{baseUrl}}"], "path": ["api", "v1", "events", "1", "register", ""] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Comments",
+			"item": [
+				{
+					"name": "List Comments for Event",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/v1/events/1/comments/", "host": ["{{baseUrl}}"], "path": ["api", "v1", "events", "1", "comments", ""] }
+					}
+				},
+				{
+					"name": "Post Comment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{jwtToken}}", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"Great event!\",\n    \"rating\": 5\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/events/1/comments/", "host": ["{{baseUrl}}"], "path": ["api", "v1", "events", "1", "comments", ""] }
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://zwidekalanga.pythonanywhere.com"
+		},
+		{
+			"key": "jwtToken",
+			"value": "REPLACE_WITH_YOUR_ACCESS_TOKEN"
+		}
+	]
+}
